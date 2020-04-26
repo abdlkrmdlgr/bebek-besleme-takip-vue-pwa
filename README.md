@@ -1,24 +1,11 @@
-# bebegimi-buyutuyorum
+Bu uygulama emzirme takibi yapabileceğiniz bir uygulamadır. Kişisel verileriniz tamamen sizin telefonunuzda saklanır. Hiç bir şekilde internet bağlantısı gerektirmez. Bebeğinizi buraya ekleyerek takibini yapabilirsiniz. Hiç bir kişisel veriniz işlenmez.
 
-## Project setup
-```
-npm install
-```
+Bebeğinizi ekledikten sonra üzerine basıp seçebilir, emzirme/mama/ek gıda ile ne zaman doyurduysanız saatini girebilirsiniz. Daha sonra geriye dönük ne kadar süt/mama/gida verdiğinizi takip edebilirsiniz.
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
 
-### Compiles and minifies for production
-```
-npm run build
-```
 
-### Lints and fixes files
-```
-npm run lint
-```
+https://bb.abdulkerimdulger.com adresinde koşan bir hali mevcuttur. 
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Pwa özelliği sayesinde sayfayı Uygulama çekmecenize eklerseniz native bir uygulama misali kullanabilirsiniz. Offline çalışma özelliği de olan bu sistem, internet bağlantısı gerektirmez. Verileriniz sadece sizin cihazınızda barınır. Hiç bir şekilde bir remote sunucuya yüklenmez. 
+
+Verileri browser cache'inde tutar. Cache temizliği yapılması durumunda veri kaybı yaşanabilir. 
