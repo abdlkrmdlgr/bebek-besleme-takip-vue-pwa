@@ -1,26 +1,36 @@
 <template>
     <div id="app">
-        <!--        <router-view></router-view>-->
-        <nav class="navbar fixed-bottom navbar-light bg-light">
-            <a @click="modalNedirShow = !modalNedirShow" class="navbar-brand text-info" href="#">
-                <FontAwesomeIcon icon="info-circle"/>
-                Nedir?
-            </a>
-
-            <a @click="addNewEmzirme" class="navbar-brand" href="#">
-                <FontAwesomeIcon icon="plus-circle" size="3x" class="text-success sticky-top plusIcon shadow"
-                                 style="border: 4px solid #fff;border-radius: 90%;"/>
-            </a>
-
-            <a v-if="!pageBabyDetail" href="#" class="navbar-brand text-info" @click="handleViewBabyDetail">
-                <FontAwesomeIcon icon="chart-line"/>
-                Stats
-            </a>
-            <a v-if="pageBabyDetail" href="#" class="navbar-brand text-info" @click="handleHomePage">
-                <FontAwesomeIcon icon="share" flip="horizontal"/>
-                Home
+        <nav class="navbar fixed-bottom" v-if="pageBabyDetail" style="left: auto!important;">
+            <a @click="editBaby" href="#">
+                <FontAwesomeIcon icon="edit" size="3x" class="text-warning sticky-top plusIcon shadow bg-white"
+                                 style="border: 4px solid #fff;border-radius: 30%;"/>
             </a>
         </nav>
+
+        <nav class="navbar fixed-bottom" v-if="!pageBabyDetail" style="left: auto!important;">
+            <a @click="modalNedirShow=!modalNedirShow" href="#">
+                <FontAwesomeIcon icon="info-circle" size="3x" class="text-info sticky-top plusIcon shadow bg-white"
+                                 style="border: 4px solid #fff;border-radius: 30%;"/>
+            </a>
+        </nav>
+
+        <div class="row mb-1 shadow p-1 bg-white rounded text-muted font-weight-bold">
+                <div class="navbar fixed-top mt-2 float-left col-4" v-if="pageBabyDetail">
+                    <a v-if="pageBabyDetail"
+                       @click="handleHomePage" href="#">
+                        <span class="text-danger fa-pull-left" style="height:32px">
+                            <FontAwesomeIcon icon="share" flip="horizontal" class="mr-1"/>Geri
+                        </span>
+                    </a>
+                </div>
+
+                <div class="h6 font-weight-bold text-center col-md-12">
+                    <img src="./assets/favicon-96x96.png"
+                         alt="Bebeğimi Büyüyüyorum"
+                         width="32"/>
+                    <i>Bebeğimi Büyütüyorum</i>
+                </div>
+        </div>
 
         <div class="card mb-1 p-4 shadow p-3 bg-white rounded" v-if="this.isAddNewVisible">
             <h6>Henüz bebek eklemediniz.</h6>
@@ -29,10 +39,13 @@
                 Yeni Bebek Ekle
             </p>
         </div>
-
-        <BabyList :babiesData="this.babies"
+        <!--        Bebeklerin listelendiği sayfadır.-->
+        <BabyList :babiesData="this.babies" @click="addNewEmzirme" @historyEvent="handleViewBabyDetail"
                   v-if="this.pageBabyList && this.babies!==null && this.babies.allBaby!==null && this.babies.allBaby.length>0"/>
-        <BabyDetail :babyItem="this.selectedBabyItem" v-if="this.pageBabyDetail"/>
+
+        <!--        Detay Sayfasıdır-->
+        <BabyDetail :babyItem="this.selectedBabyItem" :selectedBabyIndex="this.getSelectedBabyIndex()"
+                    v-if="this.pageBabyDetail"/>
 
         <!-- #####MODALS##### -->
         <b-modal v-model="modalAddNewBabyShow" title="Bebek Ekle"
@@ -46,38 +59,37 @@
                 <form class="form-inline">
                     <div class="col-md-12 input-group mb-2">
                         <toggle-button
+                                :color="{checked: '#2da9bd7a', unchecked:'#ffa6e0ba'}"
                                 v-model="babyGender"
                                 :width="120" :height="30" :fontSize="14"
                                 :labels="{checked: 'Erkek', unchecked: 'Kız'}"/>
                     </div>
 
                     <div class="col-md-12 input-group mb-2">
-                        <input type="text" step="10" class="form-control" placeholder="Bebeğinizi Adı"
-                               v-model="babyName">
+                        <b-form-input type="text" step="10" class="form-control" placeholder="Bebeğinizi Adı"
+                                      v-model="babyName"/>
                     </div>
                     <div class="col-md-12 input-group mb-2">
-                        <b-form-datepicker
-                                v-model="birthDate"
-                                placeholder="Doğum Tarihi Seç"
-                                id="datepicker-birthdate"
-                                :no-close-button="true">
-                        </b-form-datepicker>
+                        <b-form-input type="date"
+                                      v-model="birthDate"
+                                      placeholder="Doğum Tarihi Seç"
+                                      id="datepicker-birthdate"
+                                      :no-close-button="true">
+                        </b-form-input>
                     </div>
 
                     <div class="col-md-12 input-group">
-                        <input
+                        <b-form-file
                                 class="form-control"
-                                @change="uploadImage()"
-                                type="file"
                                 name="photo"
+                                v-model="selectedBabyImageFile"
                                 accept="image/*"
-                                placeholder="Fotoğraf Seç">
+                                placeholder="Fotoğraf Seç"/>
                     </div>
                 </form>
             </div>
         </b-modal>
-
-        <b-modal v-model="modalAddShow" title="Beslenme Kaydı"
+        <b-modal v-model="modalAddNewBreastFeedShow" title="Beslenme Kaydı"
                  :centered="true" :scrollable="false" headerCloseLabel="Kapat"
                  aria-label="Emzirme Kaydı"
                  :no-close-on-backdrop="true"
@@ -88,61 +100,80 @@
                 <form class="form-inlin">
                     <div class="col-md-12 input-group mb-2 p-2 ml-2 h6">
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="inlineRadioOptions"
-                                   id="inlineRadio1"
-                                   :value="0" v-model="mealType">
-                            <label class="form-check-label active mr-4" for="inlineRadio1">Anne Sütü</label>
+                            <b-form-radio-group
+                                    id="radio-group-2"
+                                    v-model="mealType"
+                                    name="radio-sub-component"
+                                    :options="this.mealTypeOptions"/>
 
-                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2"
-                                   :value="1" v-model="mealType">
-                            <label class="form-check-label" for="inlineRadio2">Mama</label>
                         </div>
                     </div>
 
                     <div class="col-md-12 input-group mb-2">
-                        <input type="number" step="10" class="form-control" placeholder="Miktar giriniz"
-                               v-model="volume">
+                        <b-form-input type="number"
+                                      step="10"
+                                      class="form-control"
+                                      placeholder="Miktar giriniz"
+                                      v-model="volume"
+                                      @keypress.enter="handleEmzirmeKayit"
+                        />
                         <div class="input-group-append">
                             <span class="input-group-text">CC</span>
                         </div>
                     </div>
                     <div class="col-md-12 input-group">
-                        <b-form-timepicker
+                        <b-form-input
+                                type="time"
                                 v-model="breastFeedingTime"
                                 placeholder="Emzirme Saati Seç"
                                 id="datepicker-invalid"
-                                :hour12="false"
-                                :hide-header="true"
-                                :minutes-step="5"
-                                :no-close-button="true">
-                        </b-form-timepicker>
+                                hour12="false"
+                                @keypress.enter="handleEmzirmeKayit"
+                        />
                     </div>
                 </form>
             </div>
         </b-modal>
         <b-modal v-model="modalNedirShow" title="Nedir?"
-                 :centered=true :scrollable=false headerCloseLabel="Kapat" :hide-footer="true"
+                 :centered=true :scrollable=true headerCloseLabel="Kapat" :hide-footer="true"
                  aria-label="Emzirme Kaydı"
                  no-button>
             <div class="col-md-12 small">
+                <p class="text-right small"><a href="https://twitter.com/bortecoder">@bortecoder</a></p>
+                <p><b>Nedir?</b></p>
                 <p>Bu uygulama emzirme takibi yapabileceğiniz bir uygulamadır.
                     Kişisel verileriniz tamamen sizin telefonunuzda saklanır.
                     Hiç bir şekilde internet bağlantısı gerektirmez.
                     Bebeğinizi buraya ekleyerek takibini yapabilirsiniz.
                     Hiç bir kişisel veriniz işlenmez.
                 </p>
+                <p><b>Nasıl kullanılır?</b></p>
+                <p>Sayfaya girdikten sonra tarayıcının Add to HomePage/Anasayfa'ya Ekle özelliğini kullanarak uygulamayı
+                    cihazınıza kurabilirsiniz.</p>
                 <p>
-                    Bebeğinizi ekledikten sonra üzerine basıp seçebilir, emzirme/mama/ek gıda ile ne zaman doyurduysanız saatini girebilirsiniz. Daha sonra geriye dönük ne kadar süt/mama/gida verdiğinizi takip edebilirsiniz.
+                    Bebeğinizi ekledikten sonra üzerine basıp seçebilir, emzirme/mama ne zaman doyurduysanız
+                    saatini girebilirsiniz. Daha sonra geriye dönük ne kadar süt/mama verdiğinizi takip
+                    edebilirsiniz.
                 </p>
-                <p class="text-right small">@bortecoder</p>
+                <p>
+                    Bebeğinizin Adını, Doğum Tarihini ve Fotoğrafını ekleyebilirsiniz.
+                    Bebeğinize ait bir kart görünümü oluşacaktır. Bu kart üzerine tıkladığınızda emzirme/mama kaydı
+                    girebileceğiniz bir form açılacaktır. Bu form üzerinden kaç cc süt/mamayı ne zaman verdiğinizi seçip
+                    kaydetmeniz durumunda bebeğinizin beslenme geçmişi oluşmaya başlayacak ve bu beslenme geçmişini yine
+                    aynı kart üzerinde bulunan tarihçesine bak özelliğinden görebilirsiniz. Tarihsel olarak son beslenme
+                    en üstte görünecek şekilde ayarlayabilirsiniz.
+                    Dilerseniz verileri info kısmından sıfırlayabilir, ya da yeni bebek ekleyebilirsiniz.
+                </p>
+
                 <p class="badge badge-success" @click="addNewBaby">
                     <font-awesome-icon icon="baby"/>
                     Yeni Bebek Ekle
                 </p>
-                <p class="badge badge-danger" @click="clearData">
+                <p class="badge badge-danger fa-pull-right" @click="modalClearDataShow=!modalClearDataShow">
                     <font-awesome-icon icon="brush"/>
                     Sıfırla
                 </p>
+
             </div>
         </b-modal>
         <b-modal v-model="requiredVolumeError" title="Zorunlu Alan?"
@@ -175,6 +206,17 @@
             </div>
 
         </b-modal>
+        <b-modal v-model="modalClearDataShow" title="Verileri Sil"
+                 :centered="true" :scrollable="false" headerCloseLabel="Kapat"
+                 aria-label="Bebek Ekle"
+                 :no-close-on-backdrop="true"
+                 cancel-variant="warning" cancel-title="Vazgeç"
+                 ok-variant="info" ok-title="Evet, Sıfırla"
+                 @ok="clearData">
+            <div class="col-md-12 small p-0">
+                <p>Tüm verileri sıfırlamak istediğinize emin misiniz?</p>
+            </div>
+        </b-modal>
     </div>
 </template>
 
@@ -190,9 +232,10 @@
                 pageBabyDetail: null,
                 pageBabyList: null,
                 modalNedirShow: false,
-                modalAddShow: false,
+                modalAddNewBreastFeedShow: false,
                 modalAddNewBabyShow: false,
                 modalAddErrorShow: false,
+                modalClearDataShow: false,
                 modalViewDetailError: false,
                 requiredVolumeError: false,
                 mealType: 0,
@@ -205,15 +248,20 @@
                 babyName: "",
                 birthDate: null,
                 babyGender: true,
-                babyImages: null
+                selectedBabyImageFile: null,
+                timeoutId: null,
+                editBabyMode: false,
+                selectedBabyImage: null,
+                oldBreastfeeding:[],
+                mealTypeOptions: [
+                    {text: 'Anne Sütü', value: 0},
+                    {text: 'Mama', value: 1}
+                ]
             }
         },
-        computed:{
-            isDisabled:function () {
-                return this.babies.length===0?"disabled":"";
-            },
-            isAddNewVisible:function () {
-                return this.babies===null || this.babies.allBaby===null || this.babies.allBaby.length===0;
+        computed: {
+            isAddNewVisible: function () {
+                return this.babies === null || this.babies.allBaby === null || this.babies.allBaby.length === 0;
             }
         },
         created() {
@@ -226,7 +274,7 @@
             addNewEmzirme: function () {
                 if (localStorage.getItem("selectedBabyIndex") != null &&
                     localStorage.getItem("selectedBabyIndex") > -1) {
-                    this.modalAddShow = !this.modalAddShow
+                    this.modalAddNewBreastFeedShow = !this.modalAddNewBreastFeedShow
                 } else {
                     this.modalAddErrorShow = !this.modalAddErrorShow
                 }
@@ -236,7 +284,10 @@
             },
             clearData: function () {
                 localStorage.removeItem("babies");
-                this.babies=null;
+                localStorage.removeItem("selectedBabyIndex");
+                localStorage.removeItem("babyImage");
+                this.babies = null;
+                this.modalNedirShow = false;
             },
             handleEmzirmeKayit: function () {
                 this.requiredVolumeError = false;
@@ -249,12 +300,12 @@
                     };
 
                     const selectedBabyIndex = localStorage.getItem("selectedBabyIndex");
+
                     this.babies.allBaby[selectedBabyIndex].breastfeeding.push(emzirmeKaydi);
                     let jsonBabies = JSON.stringify(this.babies);
                     localStorage.setItem("babies", jsonBabies);
                     this.babies = JSON.parse(jsonBabies);
                     this.babiesUpdated = true;
-
 
                     this.mealType = 0;
                     this.volume = null;
@@ -283,39 +334,104 @@
             getSelectedBabyIndex: function () {
                 return localStorage.getItem("selectedBabyIndex");
             },
-            uploadImage: function () {
-                var file = document
-                    .querySelector('input[type=file]')
-                    .files[0];
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    localStorage.setItem("babyImage",e.target.result)
-                };
-
-                reader.readAsDataURL(file);
+            editBaby: function () {
+                let selectedBabyIndex = localStorage.getItem("selectedBabyIndex");
+                let selectedBaby = this.getBabyByIndex(selectedBabyIndex);
+                this.babyName = selectedBaby.name;
+                this.birthDate = selectedBaby.birthDate;
+                this.babyGender = selectedBaby.gender;
+                this.selectedBabyImage = selectedBaby.image;
+                this.oldBreastfeeding = selectedBaby.breastfeeding;
+                this.modalAddNewBabyShow = !this.modalAddNewBabyShow;
+                this.editBabyMode = true;
             },
             handleAddNewBaby: function () {
-                let newBabyItem = {
-                    name: this.babyName,
-                    birthDate: this.birthDate,
-                    gender: this.babyGender,
-                    image: localStorage.getItem("babyImage"),
-                    breastfeeding: []
-                };
+                var appvue = this;
+                let file = this.selectedBabyImageFile;
+                let reader = new FileReader();
 
-                var storedBabies = {};
-                if (localStorage.getItem("babies")===null){
-                    var allBabyArr = [];
-                    allBabyArr.push(newBabyItem);
-                    storedBabies = {allBaby: allBabyArr};
-                }else{
-                    storedBabies = JSON.parse(localStorage.getItem("babies"));
-                    storedBabies.allBaby.push(newBabyItem);
+                if (!this.editBabyMode || (this.editBabyMode && file != null)) {
+                    reader.readAsDataURL(file);
+                    reader.onload = function (e) {
+                        appvue.resizeImage(e.target.result);
+                    };
+                } else {
+                    localStorage.setItem("babyImage", this.selectedBabyImage);
                 }
 
-                this.babies = storedBabies;
-                localStorage.setItem("babies", JSON.stringify(storedBabies));
-                localStorage.removeItem("babyImage");
+                setTimeout(
+                    function () {
+                        let newBabyItem = {
+                            name: appvue.babyName,
+                            birthDate: appvue.birthDate,
+                            gender: appvue.babyGender,
+                            image: localStorage.getItem("babyImage"),
+                            breastfeeding: appvue.oldBreastfeeding
+                        };
+
+                        let storedBabies;
+                        if (localStorage.getItem("babies") === null) {
+                            let allBabyArr = [];
+                            allBabyArr.push(newBabyItem);
+                            storedBabies = {allBaby: allBabyArr};
+                        } else {
+                            storedBabies = JSON.parse(localStorage.getItem("babies"));
+                            if (appvue.editBabyMode) {
+                                storedBabies.allBaby[localStorage.getItem("selectedBabyIndex")] = newBabyItem;
+                                appvue.editBabyMode = false;
+                                appvue.selectedBabyItem = newBabyItem;
+                            } else {
+                                storedBabies.allBaby.push(newBabyItem);
+                            }
+                        }
+
+                        appvue.babies = storedBabies;
+                        localStorage.setItem("babies", JSON.stringify(storedBabies));
+                        localStorage.removeItem("babyImage");
+
+                        appvue.modalNedirShow = false;
+                    }
+                    , 1000);
+            },
+            getBabyByIndex(index) {
+                return JSON.parse(localStorage.getItem("babies")).allBaby[index];
+
+            },
+            resizeImage: function (base64Str) {
+                var img = new Image();
+                img.src = base64Str;
+
+                var canvas = document.createElement('canvas');
+                var width;
+                var height;
+
+                img.onload = function () {
+
+                    width = img.width;
+                    height = img.height;
+
+                    var MAX_WIDTH = 300;
+                    var MAX_HEIGHT = 250;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / parseFloat(width + "");
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / parseFloat(height + "");
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    localStorage.setItem("babyImage", canvas.toDataURL());
+                };
             }
         },
         watch: {

@@ -1,7 +1,8 @@
 var CACHE_NAME = 'spaCachedFiles';
 var urlsToCache = [
     '/index.html',
-    '/favicon.ico'
+    '/favicon.ico',
+    './assets/favicon-96x96.png'
 ];
 
 self.addEventListener('install', function(event) {
@@ -9,7 +10,6 @@ self.addEventListener('install', function(event) {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(function(cache) {
-                console.log('Opened cache');
                 return cache.addAll(urlsToCache);
             })
     );

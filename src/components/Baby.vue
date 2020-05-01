@@ -1,50 +1,50 @@
 <template>
-    <div class="Baby" :class="this.babyIndex" @click="handleBabyClick">
-        <div class="card parentCard mb-4 shadow p-3 bg-white rounded">
-            <div class="card-body p-1">
-                <BabyCardHeader :babyItem="this.babyItem"></BabyCardHeader>
-                <div class="card mb-1 shadow p-3 bg-white rounded  babyDetailTable"
-                     v-if="this.babyItem.breastfeeding.length>0">
-                    <h6 class="mb-0" :class="this.genderColor">
-                        <FontAwesomeIcon icon="baby"/>
-                        Bebeğin Son Durumu
-                    </h6>
-                    <hr/>
-                    <div class="row small">
-                        <div class="col text-right">Son Yediği :</div>
-                        <div class="col text-left">{{sonYedigiTur}}</div>
-                    </div>
-                    <div class="row small">
-                        <div class="col text-right">Miktar :</div>
-                        <div class="col text-left">
-                            <FontAwesomeIcon icon="balance-scale-right" :class="this.genderColor"/>
-                            {{sonYedigiMiktar}}cc
+    <div class="Baby" :class="this.babyIndex" @click="handleBabyClick" >
+            <div class="card parentCard mb-4 shadow p-3 bg-white rounded">
+                <div class="card-body p-1">
+                    <BabyCardHeader :babyItem="this.babyItem" @historyEvent="handleHistoryBabyCardHeaderClick"></BabyCardHeader>
+                    <div class="card mb-1 shadow p-3 bg-white rounded  babyDetailTable"
+                         v-if="this.babyItem.breastfeeding!==undefined && this.babyItem.breastfeeding.length>0">
+                        <h6 class="mb-0" :class="this.genderColor">
+                            <FontAwesomeIcon icon="baby"/>
+                            Bebeğin Son Durumu
+                        </h6>
+                        <hr/>
+                        <div class="row small">
+                            <div class="col-5 text-right">Son Yediği :</div>
+                            <div class="col-7 text-left">{{sonYedigiTur}}</div>
                         </div>
-                    </div>
-                    <div class="row small">
-                        <div class="col text-right">Son Emzirme :</div>
-                        <div class="col text-left">
-                            <FontAwesomeIcon icon="clock" :class="this.genderColor"/>
-                            {{this.getEmzirmeSaatiFormatted}}
+                        <div class="row small">
+                            <div class="col-5 text-right">Miktar :</div>
+                            <div class="col-7 text-left">
+                                <FontAwesomeIcon icon="balance-scale-right" :class="this.genderColor"/>
+                                {{sonYedigiMiktar}}cc
+                            </div>
                         </div>
-                    </div>
-                    <div class="row small">
-                        <div class="col text-right">Geçen Süre :</div>
-                        <div class="col text-left">
-                            <FontAwesomeIcon icon="hourglass-end" :class="this.genderColor"/>
-                            {{this.getSonEmzirmedenBuYanaGecenSure}}
+                        <div class="row small">
+                            <div class="col-5 text-right">Son Emzirme :</div>
+                            <div class="col-7 text-left">
+                                <FontAwesomeIcon icon="clock" :class="this.genderColor"/>
+                                {{this.getEmzirmeSaatiFormatted}}
+                            </div>
                         </div>
-                    </div>
-                    <div class="row small">
-                        <div class="col text-right">Açlık Durumu :</div>
-                        <div class="col  text-left">
-                            <FontAwesomeIcon :icon="this.babyHungeryLevel.icon" :class="this.babyHungeryLevel.class"
-                                             size="2x"/>
+                        <div class="row small">
+                            <div class="col-5 text-right">Geçen Süre :</div>
+                            <div class="col-7 text-left">
+                                <FontAwesomeIcon icon="hourglass-end" :class="this.genderColor"/>
+                                {{this.getSonEmzirmedenBuYanaGecenSure}}
+                            </div>
+                        </div>
+                        <div class="row small">
+                            <div class="col-5 text-right">Açlık Durumu :</div>
+                            <div class="col-7  text-left">
+                                <FontAwesomeIcon :icon="this.babyHungeryLevel.icon" :class="this.babyHungeryLevel.class"
+                                                 size="2x"/>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
     </div>
 </template>
 
@@ -63,7 +63,7 @@
                 sonEmzirmedenBuYanaGecenSure: 0,
                 sonYedigiTur: "",
                 sonYedigiMiktar: 0,
-                babyHungeryLevel: {}
+                babyHungeryLevel: {icon:"battery-empty"}
             }
         },
         computed: {
@@ -87,7 +87,6 @@
             this.sonYedigiMiktarFunc();
             this.calculateGecenSure();
             this.babyHungeryLevelFunc();
-
         },
         methods: {
             calculateGecenSure: function () {
@@ -96,7 +95,9 @@
                 this.sonEmzirmedenBuYanaGecenSure = dakika;
             },
             getSonEmzirme: function () {
-                return this.babyItem.breastfeeding[this.babyItem.breastfeeding.length - 1];
+                if (this.babyItem.breastfeeding!==undefined) {
+                    return this.babyItem.breastfeeding[this.babyItem.breastfeeding.length - 1];
+                } else return "";
             },
             sonYedigiFunc: function () {
                 if (this.getSonEmzirme() != null) {
@@ -104,8 +105,6 @@
                         this.sonYedigiTur = "Anne Sütü";
                     } else if (this.getSonEmzirme().mealType === 1) {
                         this.sonYedigiTur = "Mama";
-                    } else if (this.getSonEmzirme().mealType === 2) {
-                        this.sonYedigiTur = "Ek Gıda";
                     }
                 }
             },
@@ -129,7 +128,10 @@
                 }
             },
             handleBabyClick: function () {
-                this.$emit("click");
+                this.$emit("babyClick");
+            },
+            handleHistoryBabyCardHeaderClick: function () {
+                this.$emit("historyEvent");
             }
         },
         watch: {

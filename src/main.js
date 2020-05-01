@@ -13,7 +13,8 @@ import ToggleButton from 'vue-js-toggle-button'
 import {
     faArrowCircleUp,
     faAt,
-    faBaby, faBalanceScaleRight,
+    faBaby,
+    faBalanceScaleRight,
     faBatteryEmpty,
     faBatteryFull,
     faBatteryHalf,
@@ -23,10 +24,15 @@ import {
     faCalendarAlt,
     faChartLine,
     faClock,
-    faCode,
-    faExclamationTriangle, faHistory,
-    faHourglassEnd, faInfoCircle,
-    faLink, faMars,
+    faCode, faEdit,
+    faExclamationTriangle,
+    faEye,
+    faHistory,
+    faHome,
+    faHourglassEnd,
+    faInfoCircle,
+    faLink,
+    faMars,
     faPlusCircle,
     faPlusSquare,
     faProcedures,
@@ -35,7 +41,10 @@ import {
     faShare,
     faSkullCrossbones,
     faSpinner,
-    faThumbtack, faVenus
+    faThumbtack,
+    faTrash,
+    faTrashAlt,
+    faVenus
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -56,8 +65,8 @@ library.add(
     faSpinner,
     faPlusCircle,
     faPlusSquare,
-    faHourglassEnd,
-    faClock,
+    faHourglassEnd, faEye,faSearch, faEdit,
+    faClock, faHome, faTrash, faTrashAlt,
     faBaby, faInfoCircle,faHistory,faMars, faVenus,
     faBatteryFull, faBatteryThreeQuarters, faBatteryHalf, faBatteryQuarter, faBatteryEmpty, faBalanceScaleRight
 );
@@ -66,7 +75,7 @@ Vue.use(ToggleButton);
 Vue.component("FontAwesomeIcon",FontAwesomeIcon);
 
 Vue.use(BootstrapVue);
-Vue.config.productionTip = false;
+Vue.config.productionTip = true;
 
 // const routes = [
 //     {path: '/', name: "homePage", component: BabyList},

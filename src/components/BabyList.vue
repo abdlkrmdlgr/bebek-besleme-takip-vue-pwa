@@ -5,7 +5,9 @@
               :key="baby.id"
               :babyItem="baby"
               :babyIndex="'b'+(index+1)"
-              @click="handleBabyClickComponent(index)"/>
+              @babyClick="handleBabyClickComponent(index)"
+              @historyEvent="handleBabyHistoryClickComponent(index)"
+        />
     </div>
 </template>
 
@@ -17,28 +19,35 @@
         name: "BabyList",
         components: {Baby},
         props: {
-            babiesData:Object
+            babiesData: Object
         },
         data: function () {
             return {
-                babiesObject:null,
-                bgColorClassName:"bg-boy"
+                babiesObject: null,
+                bgColorClassName: "bg-boy"
             }
         },
-        methods:{
+        methods: {
             handleBabyClickComponent: function (index) {
-                localStorage.setItem("selectedBabyIndex", index);
+               this.selectBaby(index);
+                this.$emit("click");
+            },
+            handleBabyHistoryClickComponent: function (index) {
+                this.selectBaby(index);
+                this.$emit("historyEvent");
+            },
+            selectBaby(index) {
+                window.localStorage.setItem("selectedBabyIndex", index);
                 $(".Baby .card").removeClass("bg-boy");
                 $(".Baby .card").removeClass("bg-girl");
 
-                if (this.babiesData.allBaby[index].gender===0){
-                    this.bgColorClassName = "bg-girl";
-                }else{
+                if (this.babiesData.allBaby[index].gender) {
                     this.bgColorClassName = "bg-boy";
+                } else {
+                    this.bgColorClassName = "bg-girl";
                 }
-                    $(".Baby.b"+(parseInt(index)+1)+" .parentCard").addClass(this.bgColorClassName);
-
-                $(".Baby.b"+(parseInt(index)+1)+" .parentCard").removeClass("bg-white");
+                $(".Baby.b" + (parseInt(index) + 1) + " .parentCard").addClass(this.bgColorClassName);
+                $(".Baby.b" + (parseInt(index) + 1) + " .parentCard").removeClass("bg-white");
             }
         }
     }

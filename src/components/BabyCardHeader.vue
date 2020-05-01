@@ -11,8 +11,11 @@
                             <FontAwesomeIcon :icon="this.genderIcon"/>
                             {{this.babyItem.name}}
                         </h5>
-                        <p class="card-text small m-0">Doğum Tarihi: {{this.babyItem.birthDate}}</p>
-                        <p class="card-text m-0"><small class="text-muted">{{this.omurStr}} günlük</small></p>
+                        <p class="card-text small m-0">Doğ. Tarihi : {{this.babyItem.birthDate}}</p>
+                        <p class="card-text m-0"><small class="text-muted">{{this.omurStr}}günlük</small></p>
+                    </div>
+                    <div class="card-footer p-0 bg-white border-0 fa-pull-right pr-1" @click.stop="handleHistoryClick">
+                        <font-awesome-icon icon="search" class="text-danger"/>
                     </div>
                 </div>
             </div>
@@ -52,18 +55,21 @@
 
                 if (gun > 365) {
                     const yil = (gun - yilArtigi) / 365;
-                    this.omurStr = yil +" yıl";
+                    this.omurStr = yil +"yıl ";
                 }
 
                 if (yilArtigi > 30) {
                     const ayArtigi = yilArtigi % 30;
                     const ay = (yilArtigi - ayArtigi) / 30;
-                    this.omurStr = ay +" ay";
+                    this.omurStr = ay +"ay ";
                     yilArtigi = ayArtigi;
                 }
 
                 this.omurStr += Math.round(yilArtigi);
 
+            },
+            handleHistoryClick:function () {
+                this.$emit("historyEvent");
             }
         }
     };
